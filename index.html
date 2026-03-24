@@ -10,6 +10,7 @@
         .form-container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 30px; margin-bottom: 50px; }
         .section-title { border-bottom: 2px solid #0d6efd; padding-bottom: 10px; margin-bottom: 20px; margin-top: 30px; color: #0d6efd; font-weight: bold; }
         #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; text-align: center; padding-top: 20vh; }
+        .box-info { background-color: #e9ecef; border-radius: 8px; padding: 15px; text-align: center; }
     </style>
 </head>
 <body>
@@ -27,10 +28,22 @@
                     <h2>Penerimaan Peserta Didik Baru (PPDB)</h2>
                     <p class="text-muted">Isi formulir di bawah ini dengan data yang valid dan benar.</p>
                 </div>
-<div class="alert alert-secondary text-center shadow-sm" id="infoKuota" style="display: none;">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-                    Mengecek sisa kuota pendaftaran...
+
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="box-info border border-primary">
+                            <h6 class="text-muted mb-1">KUOTA</h6>
+                            <h3 class="mb-0 fw-bold text-primary" id="textKuota">...</h3>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="box-info border border-success">
+                            <h6 class="text-muted mb-1">PENDAFTAR</h6>
+                            <h3 class="mb-0 fw-bold text-success" id="textPendaftar">...</h3>
+                        </div>
+                    </div>
                 </div>
+
                 <form id="formPPDB">
                     <h5 class="section-title">A. Data Calon Siswa</h5>
                     <div class="mb-3">
@@ -138,46 +151,6 @@
         // URL API DARI GOOGLE APPS SCRIPT MAS ECKY
         const API_URL = 'https://script.google.com/macros/s/AKfycbxfP-bu9ElQEEOVEOIfxTdo2S4MXTCH87B8icvID3a5S6uCwJ9cqf6zunCsgkTg9-tQjQ/exec';
 
-// Fungsi untuk mengecek kuota saat halaman dibuka
-        async function cekKuota() {
-            const infoKuota = document.getElementById('infoKuota');
-            const formPPDB = document.getElementById('formPPDB');
-            const btnSubmit = document.querySelector('button[type="submit"]');
-            
-            infoKuota.style.display = 'block';
-
-            try {
-                // Gunakan metode GET untuk mengambil data dari doGet() GAS
-                const response = await fetch(API_URL);
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    if (data.sisaKuota > 0) {
-                        // Kuota masih ada
-                        infoKuota.className = 'alert alert-info text-center shadow-sm fw-bold';
-                        infoKuota.innerHTML = `📊 Pendaftar: ${data.totalPendaftar} | Sisa Kuota: <span class="text-danger fs-4">${data.sisaKuota}</span> dari ${data.totalKuota}`;
-                    } else {
-                        // Kuota habis
-                        infoKuota.className = 'alert alert-danger text-center shadow-sm fw-bold fs-5';
-                        infoKuota.innerHTML = `🚫 MAAF, KUOTA PENDAFTARAN SUDAH PENUH (${data.totalKuota} Pendaftar)`;
-                        
-                        // Kunci form dan tombol submit
-                        formPPDB.style.opacity = '0.6';
-                        formPPDB.style.pointerEvents = 'none'; // Bikin form tidak bisa diklik
-                        btnSubmit.disabled = true;
-                        btnSubmit.innerText = "PENDAFTARAN DITUTUP";
-                        btnSubmit.classList.replace('btn-primary', 'btn-secondary');
-                    }
-                }
-            } catch (error) {
-                infoKuota.className = 'alert alert-warning text-center';
-                infoKuota.innerHTML = "⚠️ Gagal memuat informasi kuota. Silakan refresh halaman.";
-            }
-        }
-
-        // Jalankan fungsi cekKuota otomatis saat halaman pertama kali diload
-        window.onload = cekKuota;
-        
         // Fungsi ajaib untuk mengubah File menjadi Base64 string
         const getBase64 = (file) => new Promise((resolve, reject) => {
             if (!file) { resolve(""); return; }
@@ -187,26 +160,46 @@
             reader.onerror = error => reject(error);
         });
 
-        document.getElementById('formPPDB').addEventListener('submit', async function(e) {
-            e.preventDefault(); // Mencegah halaman reload
+        // 1. Fungsi Cek Kuota (Sederhana)
+        async function cekKuota() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
 
-            // Tampilkan loading
+                if (data.status === 'success') {
+                    document.getElementById('textKuota').innerText = data.totalKuota;
+                    document.getElementById('textPendaftar').innerText = data.totalPendaftar;
+                } else {
+                    document.getElementById('textKuota').innerText = "-";
+                    document.getElementById('textPendaftar').innerText = "-";
+                }
+            } catch (error) {
+                console.error("Gagal mengambil data kuota:", error);
+                document.getElementById('textKuota').innerText = "?";
+                document.getElementById('textPendaftar').innerText = "?";
+            }
+        }
+
+        // Panggil fungsi cekKuota saat web pertama kali dimuat
+        window.onload = cekKuota;
+
+        // 2. Fungsi Submit Form
+        document.getElementById('formPPDB').addEventListener('submit', async function(e) {
+            e.preventDefault(); 
+
             document.getElementById('loadingOverlay').style.display = 'block';
 
             try {
-                // Ambil file dari input
                 const filePasFoto = document.getElementById('pasFoto').files[0];
                 const fileIjazah = document.getElementById('fotoIjazah').files[0];
                 const fileKK = document.getElementById('fotoKK').files[0];
 
-                // Ubah file ke Base64 secara paralel
                 const [base64PasFoto, base64Ijazah, base64KK] = await Promise.all([
                     getBase64(filePasFoto),
                     getBase64(fileIjazah),
                     getBase64(fileKK)
                 ]);
 
-                // Susun data JSON sesuai dengan nama variabel di GAS
                 const payload = {
                     namaSiswa: document.getElementById('namaSiswa').value,
                     tempatLahir: document.getElementById('tempatLahir').value,
@@ -225,23 +218,19 @@
                     fotoKK: base64KK
                 };
 
-                // Kirim data ke Google Apps Script
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // Pakai text/plain untuk hindari masalah CORS preflight
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
                     body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
 
-                // Sembunyikan loading
                 document.getElementById('loadingOverlay').style.display = 'none';
 
                 if (result.status === 'success') {
-                    // Sembunyikan form, tampilkan pesan sukses
                     document.getElementById('formPPDB').style.display = 'none';
                     document.getElementById('successMessage').style.display = 'block';
-                    // Tampilkan Kode Unik Pendaftar dari response GAS
                     document.getElementById('kodePendaftaranText').innerText = result.kodeUnik;
                 } else {
                     alert('Terjadi kesalahan: ' + result.message);
