@@ -48,12 +48,12 @@
                     <h5 class="section-title">A. Data Calon Siswa</h5>
                     <div class="mb-3">
                         <label class="form-label">Nama Lengkap Siswa</label>
-                        <input type="text" class="form-control" id="namaSiswa" required>
+                        <input type="text" class="form-control" id="namaSiswa" oninput="this.value = this.value.toUpperCase()" required>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Tempat Lahir</label>
-                            <input type="text" class="form-control" id="tempatLahir" placeholder="Contoh: Pasuruan" required>
+                            <input type="text" class="form-control" id="tempatLahir" placeholder="CONTOH: PASURUAN" oninput="this.value = this.value.toUpperCase()" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Tanggal Lahir</label>
@@ -63,29 +63,29 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Asal Sekolah</label>
-                            <input type="text" class="form-control" id="asalSekolah" required>
+                            <input type="text" class="form-control" id="asalSekolah" oninput="this.value = this.value.toUpperCase()" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Jenis Kelamin</label>
                             <select class="form-select" id="jenisKelamin" required>
-                                <option value="">Pilih...</option>
-                                <option value="Laki-laki">Laki-laki</option>
-                                <option value="Perempuan">Perempuan</option>
+                                <option value="">PILIH...</option>
+                                <option value="LAKI-LAKI">LAKI-LAKI</option>
+                                <option value="PEREMPUAN">PEREMPUAN</option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Alamat Lengkap Rumah</label>
-                        <textarea class="form-control" id="alamatRumah" rows="2" required></textarea>
+                        <textarea class="form-control" id="alamatRumah" rows="2" oninput="this.value = this.value.toUpperCase()" required></textarea>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Tinggi Badan (cm)</label>
-                            <input type="number" class="form-control" id="tinggiBadan" required>
+                            <input type="number" min="0" class="form-control" id="tinggiBadan" placeholder="Hanya angka, misal: 160" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Nilai Rata-rata Rapor</label>
-                            <input type="number" step="0.01" class="form-control" id="nilaiRapor" required>
+                            <input type="number" step="0.01" min="0" class="form-control" id="nilaiRapor" placeholder="Hanya angka, misal: 85.50" required>
                         </div>
                     </div>
 
@@ -93,25 +93,25 @@
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label">Nama Orang Tua/Wali</label>
-                            <input type="text" class="form-control" id="namaOrtu" required>
+                            <input type="text" class="form-control" id="namaOrtu" oninput="this.value = this.value.toUpperCase()" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Pekerjaan</label>
-                            <input type="text" class="form-control" id="pekerjaanOrtu" required>
+                            <input type="text" class="form-control" id="pekerjaanOrtu" oninput="this.value = this.value.toUpperCase()" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Penghasilan / Bulan</label>
                             <select class="form-select" id="penghasilanOrtu" required>
-                                <option value="">Pilih...</option>
-                                <option value="< Rp 1.000.000">< Rp 1.000.000</option>
-                                <option value="Rp 1.000.000 - Rp 3.000.000">Rp 1.000.000 - Rp 3.000.000</option>
-                                <option value="> Rp 3.000.000">> Rp 3.000.000</option>
+                                <option value="">PILIH...</option>
+                                <option value="< RP 1.000.000">< RP 1.000.000</option>
+                                <option value="RP 1.000.000 - RP 3.000.000">RP 1.000.000 - RP 3.000.000</option>
+                                <option value="> RP 3.000.000">> RP 3.000.000</option>
                             </select>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Prestasi yang pernah diraih (Opsional)</label>
-                        <input type="text" class="form-control" id="prestasi" placeholder="Misal: Juara 1 Lomba Cerdas Cermat">
+                        <label class="form-label">Prestasi yang pernah diraih</label>
+                        <input type="text" class="form-control" id="prestasi" placeholder="MISAL: JUARA 1 LOMBA CERDAS CERMAT (JIKA TIDAK ADA, ISI: TIDAK ADA)" oninput="this.value = this.value.toUpperCase()" required>
                     </div>
 
                     <h5 class="section-title">C. Unggah Berkas</h5>
@@ -148,7 +148,7 @@
     </div>
 
     <script>
-        // URL API DARI GOOGLE APPS SCRIPT MAS ECKY
+        // URL API DARI GOOGLE APPS SCRIPT
         const API_URL = 'https://script.google.com/macros/s/AKfycbxfP-bu9ElQEEOVEOIfxTdo2S4MXTCH87B8icvID3a5S6uCwJ9cqf6zunCsgkTg9-tQjQ/exec';
 
         // Fungsi ajaib untuk mengubah File menjadi Base64 string
@@ -200,19 +200,20 @@
                     getBase64(fileKK)
                 ]);
 
+                // Pastikan data yang dikirim ke backend juga dalam format Uppercase sebagai lapisan keamanan ganda
                 const payload = {
-                    namaSiswa: document.getElementById('namaSiswa').value,
-                    tempatLahir: document.getElementById('tempatLahir').value,
+                    namaSiswa: document.getElementById('namaSiswa').value.toUpperCase(),
+                    tempatLahir: document.getElementById('tempatLahir').value.toUpperCase(),
                     tanggalLahir: document.getElementById('tanggalLahir').value,
-                    asalSekolah: document.getElementById('asalSekolah').value,
-                    jenisKelamin: document.getElementById('jenisKelamin').value,
-                    alamatRumah: document.getElementById('alamatRumah').value,
+                    asalSekolah: document.getElementById('asalSekolah').value.toUpperCase(),
+                    jenisKelamin: document.getElementById('jenisKelamin').value.toUpperCase(),
+                    alamatRumah: document.getElementById('alamatRumah').value.toUpperCase(),
                     tinggiBadan: document.getElementById('tinggiBadan').value,
                     nilaiRapor: document.getElementById('nilaiRapor').value,
-                    namaOrtu: document.getElementById('namaOrtu').value,
-                    pekerjaanOrtu: document.getElementById('pekerjaanOrtu').value,
-                    penghasilanOrtu: document.getElementById('penghasilanOrtu').value,
-                    prestasi: document.getElementById('prestasi').value,
+                    namaOrtu: document.getElementById('namaOrtu').value.toUpperCase(),
+                    pekerjaanOrtu: document.getElementById('pekerjaanOrtu').value.toUpperCase(),
+                    penghasilanOrtu: document.getElementById('penghasilanOrtu').value.toUpperCase(),
+                    prestasi: document.getElementById('prestasi').value.toUpperCase(),
                     pasFoto: base64PasFoto,
                     fotoIjazah: base64Ijazah,
                     fotoKK: base64KK
