@@ -27,7 +27,10 @@
                     <h2>Penerimaan Peserta Didik Baru (PPDB)</h2>
                     <p class="text-muted">Isi formulir di bawah ini dengan data yang valid dan benar.</p>
                 </div>
-
+<div class="alert alert-secondary text-center shadow-sm" id="infoKuota" style="display: none;">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    Mengecek sisa kuota pendaftaran...
+                </div>
                 <form id="formPPDB">
                     <h5 class="section-title">A. Data Calon Siswa</h5>
                     <div class="mb-3">
@@ -135,6 +138,46 @@
         // URL API DARI GOOGLE APPS SCRIPT MAS ECKY
         const API_URL = 'https://script.google.com/macros/s/AKfycbxfP-bu9ElQEEOVEOIfxTdo2S4MXTCH87B8icvID3a5S6uCwJ9cqf6zunCsgkTg9-tQjQ/exec';
 
+// Fungsi untuk mengecek kuota saat halaman dibuka
+        async function cekKuota() {
+            const infoKuota = document.getElementById('infoKuota');
+            const formPPDB = document.getElementById('formPPDB');
+            const btnSubmit = document.querySelector('button[type="submit"]');
+            
+            infoKuota.style.display = 'block';
+
+            try {
+                // Gunakan metode GET untuk mengambil data dari doGet() GAS
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    if (data.sisaKuota > 0) {
+                        // Kuota masih ada
+                        infoKuota.className = 'alert alert-info text-center shadow-sm fw-bold';
+                        infoKuota.innerHTML = `📊 Pendaftar: ${data.totalPendaftar} | Sisa Kuota: <span class="text-danger fs-4">${data.sisaKuota}</span> dari ${data.totalKuota}`;
+                    } else {
+                        // Kuota habis
+                        infoKuota.className = 'alert alert-danger text-center shadow-sm fw-bold fs-5';
+                        infoKuota.innerHTML = `🚫 MAAF, KUOTA PENDAFTARAN SUDAH PENUH (${data.totalKuota} Pendaftar)`;
+                        
+                        // Kunci form dan tombol submit
+                        formPPDB.style.opacity = '0.6';
+                        formPPDB.style.pointerEvents = 'none'; // Bikin form tidak bisa diklik
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerText = "PENDAFTARAN DITUTUP";
+                        btnSubmit.classList.replace('btn-primary', 'btn-secondary');
+                    }
+                }
+            } catch (error) {
+                infoKuota.className = 'alert alert-warning text-center';
+                infoKuota.innerHTML = "⚠️ Gagal memuat informasi kuota. Silakan refresh halaman.";
+            }
+        }
+
+        // Jalankan fungsi cekKuota otomatis saat halaman pertama kali diload
+        window.onload = cekKuota;
+        
         // Fungsi ajaib untuk mengubah File menjadi Base64 string
         const getBase64 = (file) => new Promise((resolve, reject) => {
             if (!file) { resolve(""); return; }
